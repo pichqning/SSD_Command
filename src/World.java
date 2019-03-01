@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Observable;
 import java.util.Random;
 
@@ -14,6 +16,12 @@ public class World extends Observable {
 
     private Enemy [] enemies;
 
+    //add something to record
+    private List<Command> cmdList = new ArrayList<>();
+    private boolean replayMode = false;
+    public void setReplayMode () {
+        replayMode = true;
+    }
     public World(int size) {
         this.size = size;
         tick = 0;
@@ -34,6 +42,11 @@ public class World extends Observable {
             @Override
             public void run() {
                 while(notOver) {
+                    if (replayMode) {
+                        for (Command c : cmdList) {
+                            if (c.getTick() == tick) c.execute();
+                        }
+                    }
                     tick++;
                     player.move();
                     checkCollisions();
@@ -45,6 +58,7 @@ public class World extends Observable {
         };
         thread.start();
     }
+
 
     private void checkCollisions() {
         for(Enemy e : enemies) {
@@ -75,19 +89,31 @@ public class World extends Observable {
     }
 
     public void turnPlayerNorth() {
-        player.turnNorth();
+        CommandNorth cmd = new CommandNorth(tick,player);
+        cmd.execute();
+        //record
+        cmdList.add(cmd);
     }
 
     public void turnPlayerSouth() {
-        player.turnSouth();
+        CommandSouth cmd = new CommandSouth(tick,player);
+        cmd.execute();
+        cmdList.add(cmd);
+
     }
 
     public void turnPlayerWest() {
-        player.turnWest();
+        CommandWest cmd = new CommandWest(tick,player);
+        cmd.execute();
+        cmdList.add(cmd);
+
     }
 
     public void turnPlayerEast() {
-        player.turnEast();
+        CommandEast cmd = new CommandEast(tick,player);
+        cmd.execute();
+        cmdList.add(cmd);
+
     }
 
     public Enemy[] getEnemies() {
